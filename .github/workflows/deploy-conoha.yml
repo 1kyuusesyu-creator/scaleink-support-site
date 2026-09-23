@@ -1,0 +1,383 @@
+name: Deploy to ConoHa WING (manual)
+
+# Manual-only trigger. Do not add push/pull_request/schedule triggers here.
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+# Only one deploy may run at a time; a second dispatch waits instead of
+# cancelling a deploy that may be mid file-swap on the remote host.
+concurrency:
+  group: conoha-deploy-production
+  cancel-in-progress: false
+
+env:
+  REMOTE_STAGING_DIR: .scaleink-deploy-${{ github.run_id }}-${{ github.run_attempt }}
+  REMOTE_BACKUP_DIR: .scaleink-backup-${{ github.run_id }}-${{ github.run_attempt }}
+  REMOTE_FAILED_DIR: .scaleink-failed-${{ github.run_id }}-${{ github.run_attempt }}
+  PROD_RELATIVE_PATH: public_html/scaleink.app
+  PROD_BASENAME: scaleink.app
+  SITE_URL: https://scaleink.app
+
+jobs:
+  deploy:
+    name: Build and deploy out/ to ConoHa WING
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "npm"
+
+      - name: Install dependencies (npm ci)
+        run: npm ci
+
+      - name: Build static export (npm run build)
+        run: npm run build
+
+      # Requirement 6: verify local build output BEFORE any SSH/secret
+      # handling takes place. If any required file is missing, fail here.
+      - name: Verify local static export output
+        run: |
+          set -euo pipefail
+          required_files=(
+            "out/index.html"
+            "out/support/index.html"
+            "out/privacy/index.html"
+            "out/robots.txt"
+            "out/sitemap.xml"
+          )
+          missing=0
+          for f in "${required_files[@]}"; do
+            if [ ! -f "$f" ]; then
+              echo "::error::Missing required build output: $f"
+              missing=1
+            else
+              echo "OK: $f"
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            echo "::error::One or more required static export files are missing. Aborting before any SSH setup."
+            exit 1
+          fi
+
+      # Requirement 7: confirm secrets are present without ever printing
+      # their values.
+      - name: Verify required secrets are present
+        env:
+          CONOHA_SSH_HOST: ${{ secrets.CONOHA_SSH_HOST }}
+          CONOHA_SSH_PORT: ${{ secrets.CONOHA_SSH_PORT }}
+          CONOHA_SSH_USER: ${{ secrets.CONOHA_SSH_USER }}
+          CONOHA_SSH_PRIVATE_KEY: ${{ secrets.CONOHA_SSH_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          : "${CONOHA_SSH_HOST:?CONOHA_SSH_HOST secret is not set}"
+          : "${CONOHA_SSH_PORT:?CONOHA_SSH_PORT secret is not set}"
+          : "${CONOHA_SSH_USER:?CONOHA_SSH_USER secret is not set}"
+          : "${CONOHA_SSH_PRIVATE_KEY:?CONOHA_SSH_PRIVATE_KEY secret is not set}"
+          echo "All required secrets are present (values not printed)."
+
+      # Requirement 8: private key goes to a temp file with 0600 permissions.
+      - name: Write SSH private key to temp file
+        env:
+          CONOHA_SSH_PRIVATE_KEY: ${{ secrets.CONOHA_SSH_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          key_file="${RUNNER_TEMP}/conoha_deploy_key"
+          umask 077
+          printf '%s\n' "$CONOHA_SSH_PRIVATE_KEY" > "$key_file"
+          chmod 600 "$key_file"
+          echo "SSH_KEY_FILE=$key_file" >> "$GITHUB_ENV"
+
+      # Requirement 10: known_hosts is populated via ssh-keyscan (TOFU on
+      # first run — see the "host key verification" note in the completion
+      # report for the residual trust-on-first-use constraint this implies).
+      # StrictHostKeyChecking is explicitly kept at "yes" everywhere below.
+      - name: Prepare known_hosts (no StrictHostKeyChecking=no)
+        env:
+          CONOHA_SSH_HOST: ${{ secrets.CONOHA_SSH_HOST }}
+          CONOHA_SSH_PORT: ${{ secrets.CONOHA_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          known_hosts_file="${RUNNER_TEMP}/conoha_known_hosts"
+          : > "$known_hosts_file"
+          ssh-keyscan -p "$CONOHA_SSH_PORT" -H "$CONOHA_SSH_HOST" >> "$known_hosts_file" 2>/dev/null
+          if [ ! -s "$known_hosts_file" ]; then
+            echo "::error::ssh-keyscan returned no host keys; refusing to continue."
+            exit 1
+          fi
+          echo "KNOWN_HOSTS_FILE=$known_hosts_file" >> "$GITHUB_ENV"
+
+      # Requirement 11/22: upload out/ only, into a remote temp dir outside
+      # the public directory. scp -r with a not-yet-existing remote target
+      # copies the *contents* of out/ into that target directory (no nested
+      # "out" folder), so REMOTE_STAGING_DIR ends up holding index.html,
+      # support/index.html, etc. directly.
+      - name: Upload out/ to remote staging directory
+        env:
+          CONOHA_SSH_HOST: ${{ secrets.CONOHA_SSH_HOST }}
+          CONOHA_SSH_PORT: ${{ secrets.CONOHA_SSH_PORT }}
+          CONOHA_SSH_USER: ${{ secrets.CONOHA_SSH_USER }}
+        run: |
+          set -euo pipefail
+          ssh_opts=(
+            -i "$SSH_KEY_FILE"
+            -o UserKnownHostsFile="$KNOWN_HOSTS_FILE"
+            -o StrictHostKeyChecking=yes
+            -p "$CONOHA_SSH_PORT"
+          )
+          scp_opts=(
+            -i "$SSH_KEY_FILE"
+            -o UserKnownHostsFile="$KNOWN_HOSTS_FILE"
+            -o StrictHostKeyChecking=yes
+            -P "$CONOHA_SSH_PORT"
+          )
+
+          # Fail if the staging path already exists (should be unique per run).
+          ssh "${ssh_opts[@]}" "${CONOHA_SSH_USER}@${CONOHA_SSH_HOST}" \
+            "if [ -e \"\$HOME/${REMOTE_STAGING_DIR}\" ]; then echo 'staging dir already exists'; exit 1; fi"
+
+          scp -r "${scp_opts[@]}" out "${CONOHA_SSH_USER}@${CONOHA_SSH_HOST}:${REMOTE_STAGING_DIR}"
+
+      # Requirement 13: re-verify the required 5 files on the remote side
+      # after upload, before touching production.
+      - name: Verify remote staging directory contents
+        env:
+          CONOHA_SSH_HOST: ${{ secrets.CONOHA_SSH_HOST }}
+          CONOHA_SSH_PORT: ${{ secrets.CONOHA_SSH_PORT }}
+          CONOHA_SSH_USER: ${{ secrets.CONOHA_SSH_USER }}
+        run: |
+          set -euo pipefail
+          ssh -i "$SSH_KEY_FILE" \
+            -o UserKnownHostsFile="$KNOWN_HOSTS_FILE" \
+            -o StrictHostKeyChecking=yes \
+            -p "$CONOHA_SSH_PORT" \
+            "${CONOHA_SSH_USER}@${CONOHA_SSH_HOST}" \
+            "STAGING_DIR=\$HOME/${REMOTE_STAGING_DIR} bash -s" <<'REMOTE_SCRIPT'
+            set -euo pipefail
+            required_files=(
+              "index.html"
+              "support/index.html"
+              "privacy/index.html"
+              "robots.txt"
+              "sitemap.xml"
+            )
+            missing=0
+            for f in "${required_files[@]}"; do
+              if [ ! -f "$STAGING_DIR/$f" ]; then
+                echo "Missing on remote staging: $f"
+                missing=1
+              fi
+            done
+            if [ "$missing" -ne 0 ]; then
+              echo "Remote staging directory verification failed."
+              exit 1
+            fi
+            echo "Remote staging directory verified."
+          REMOTE_SCRIPT
+
+      # Requirements 14-16: fixed path guards, .htaccess preservation, and
+      # the backup -> swap sequence, all inside one remote script so the
+      # swap step can roll itself back immediately if the second mv fails.
+      - name: Guard checks and atomic swap into production
+        id: swap
+        env:
+          CONOHA_SSH_HOST: ${{ secrets.CONOHA_SSH_HOST }}
+          CONOHA_SSH_PORT: ${{ secrets.CONOHA_SSH_PORT }}
+          CONOHA_SSH_USER: ${{ secrets.CONOHA_SSH_USER }}
+        run: |
+          set -euo pipefail
+          ssh -i "$SSH_KEY_FILE" \
+            -o UserKnownHostsFile="$KNOWN_HOSTS_FILE" \
+            -o StrictHostKeyChecking=yes \
+            -p "$CONOHA_SSH_PORT" \
+            "${CONOHA_SSH_USER}@${CONOHA_SSH_HOST}" \
+            "STAGING_DIR=\$HOME/${REMOTE_STAGING_DIR} BACKUP_DIR=\$HOME/${REMOTE_BACKUP_DIR} PROD_BASENAME=${PROD_BASENAME} bash -s" <<'REMOTE_SCRIPT'
+            set -euo pipefail
+
+            PUBLIC_HTML="$HOME/public_html"
+            PROD_DIR="$PUBLIC_HTML/$PROD_BASENAME"
+
+            # Fixed guards (requirement 14): refuse anything but the exact,
+            # already-existing production directory.
+            if [ -z "$PROD_DIR" ]; then
+              echo "Guard failed: empty production path."
+              exit 1
+            fi
+            if [ "$PROD_DIR" = "$HOME" ] || [ "$PROD_DIR" = "$PUBLIC_HTML" ]; then
+              echo "Guard failed: refusing to target \$HOME or public_html itself."
+              exit 1
+            fi
+            if [ "$(basename "$PROD_DIR")" != "$PROD_BASENAME" ]; then
+              echo "Guard failed: basename is not exactly '$PROD_BASENAME'."
+              exit 1
+            fi
+            if [ ! -d "$PUBLIC_HTML" ]; then
+              echo "Guard failed: \$HOME/public_html does not exist."
+              exit 1
+            fi
+            if [ ! -d "$PROD_DIR" ]; then
+              echo "Guard failed: production directory does not already exist."
+              exit 1
+            fi
+            if [ ! -d "$STAGING_DIR" ]; then
+              echo "Guard failed: staging directory is missing."
+              exit 1
+            fi
+            if [ -e "$BACKUP_DIR" ]; then
+              echo "Guard failed: backup path already exists."
+              exit 1
+            fi
+
+            # Requirement 15: preserve an existing .htaccess as-is into staging.
+            if [ -f "$PROD_DIR/.htaccess" ]; then
+              cp -p "$PROD_DIR/.htaccess" "$STAGING_DIR/.htaccess"
+              echo "Preserved existing .htaccess into staging."
+            else
+              echo "No existing .htaccess to preserve."
+            fi
+
+            # Preserve an existing .well-known directory as-is into staging
+            # (e.g. ACME challenges, Apple App Site Association, site
+            # verification files). Contents are copied unmodified.
+            if [ -d "$PROD_DIR/.well-known" ]; then
+              cp -a "$PROD_DIR/.well-known" "$STAGING_DIR/.well-known"
+              echo "Preserved existing .well-known into staging."
+            else
+              echo "No existing .well-known to preserve."
+            fi
+
+            # Re-verify required files are present in staging one more time
+            # immediately before the swap.
+            for f in index.html support/index.html privacy/index.html robots.txt sitemap.xml; do
+              if [ ! -f "$STAGING_DIR/$f" ]; then
+                echo "Guard failed: staging missing $f immediately before swap."
+                exit 1
+              fi
+            done
+
+            # Requirement 16: same-filesystem swap, current prod -> backup,
+            # then staging -> prod. Roll back immediately if the second
+            # move fails.
+            if ! mv "$PROD_DIR" "$BACKUP_DIR"; then
+              echo "Swap failed: could not move current production to backup."
+              exit 1
+            fi
+
+            if ! mv "$STAGING_DIR" "$PROD_DIR"; then
+              echo "Swap failed: could not move staging into production. Restoring backup."
+              if mv "$BACKUP_DIR" "$PROD_DIR"; then
+                echo "Restored previous production from backup after failed swap."
+              else
+                echo "CRITICAL: restore from backup also failed. Manual intervention required."
+              fi
+              exit 1
+            fi
+
+            echo "Swap complete: staging is now live at $PROD_DIR, previous version kept at $BACKUP_DIR."
+          REMOTE_SCRIPT
+
+      # Requirement 17: verify the live site from the runner, over HTTPS,
+      # following redirects, and require a final 200.
+      - name: Verify production over HTTPS
+        id: https_verify
+        run: |
+          set -euo pipefail
+          routes=(
+            "/"
+            "/support/"
+            "/privacy/"
+            "/robots.txt"
+            "/sitemap.xml"
+          )
+          failed=0
+          for route in "${routes[@]}"; do
+            code=$(curl -s -L -o /dev/null -w "%{http_code}" "${SITE_URL}${route}" || echo "000")
+            echo "${route} -> ${code}"
+            if [ "$code" != "200" ]; then
+              failed=1
+            fi
+          done
+          if [ "$failed" -ne 0 ]; then
+            echo "::error::One or more production routes did not return a final HTTP 200."
+            exit 1
+          fi
+
+      # Requirement 18: on HTTPS verification failure, move the bad new
+      # production aside and restore the previous version from backup.
+      - name: Roll back production on verification failure
+        if: ${{ failure() && steps.swap.outcome == 'success' }}
+        env:
+          CONOHA_SSH_HOST: ${{ secrets.CONOHA_SSH_HOST }}
+          CONOHA_SSH_PORT: ${{ secrets.CONOHA_SSH_PORT }}
+          CONOHA_SSH_USER: ${{ secrets.CONOHA_SSH_USER }}
+        run: |
+          set -euo pipefail
+          ssh -i "$SSH_KEY_FILE" \
+            -o UserKnownHostsFile="$KNOWN_HOSTS_FILE" \
+            -o StrictHostKeyChecking=yes \
+            -p "$CONOHA_SSH_PORT" \
+            "${CONOHA_SSH_USER}@${CONOHA_SSH_HOST}" \
+            "BACKUP_DIR=\$HOME/${REMOTE_BACKUP_DIR} FAILED_DIR=\$HOME/${REMOTE_FAILED_DIR} PROD_BASENAME=${PROD_BASENAME} bash -s" <<'REMOTE_SCRIPT'
+            set -euo pipefail
+            PUBLIC_HTML="$HOME/public_html"
+            PROD_DIR="$PUBLIC_HTML/$PROD_BASENAME"
+
+            if [ ! -d "$BACKUP_DIR" ]; then
+              echo "CRITICAL: no backup directory found to restore from. Manual intervention required."
+              exit 1
+            fi
+
+            if [ -d "$PROD_DIR" ]; then
+              mv "$PROD_DIR" "$FAILED_DIR"
+              echo "Moved failing new production aside to $FAILED_DIR (outside public_html)."
+            fi
+
+            if ! mv "$BACKUP_DIR" "$PROD_DIR"; then
+              echo "CRITICAL: could not restore previous production from backup after HTTPS verification failure. Production directory may be missing. Manual intervention required."
+              exit 1
+            fi
+            echo "Restored previous production from backup after HTTPS verification failure."
+          REMOTE_SCRIPT
+
+      # Requirement 19: only clean up backup/staging remnants on full success.
+      - name: Clean up backup and staging on success
+        if: ${{ success() }}
+        env:
+          CONOHA_SSH_HOST: ${{ secrets.CONOHA_SSH_HOST }}
+          CONOHA_SSH_PORT: ${{ secrets.CONOHA_SSH_PORT }}
+          CONOHA_SSH_USER: ${{ secrets.CONOHA_SSH_USER }}
+        run: |
+          set -euo pipefail
+          ssh -i "$SSH_KEY_FILE" \
+            -o UserKnownHostsFile="$KNOWN_HOSTS_FILE" \
+            -o StrictHostKeyChecking=yes \
+            -p "$CONOHA_SSH_PORT" \
+            "${CONOHA_SSH_USER}@${CONOHA_SSH_HOST}" \
+            "BACKUP_DIR=\$HOME/${REMOTE_BACKUP_DIR} STAGING_DIR=\$HOME/${REMOTE_STAGING_DIR} bash -s" <<'REMOTE_SCRIPT'
+            set -euo pipefail
+            if [ -d "$BACKUP_DIR" ]; then
+              rm -rf "$BACKUP_DIR"
+              echo "Removed backup directory."
+            fi
+            if [ -d "$STAGING_DIR" ]; then
+              rm -rf "$STAGING_DIR"
+              echo "Removed leftover staging directory."
+            fi
+          REMOTE_SCRIPT
+
+      # Requirement 9: always remove the private key file from the runner.
+      - name: Remove SSH private key from runner
+        if: ${{ always() }}
+        run: |
+          if [ -n "${SSH_KEY_FILE:-}" ] && [ -f "${SSH_KEY_FILE}" ]; then
+            rm -f "${SSH_KEY_FILE}"
+            echo "Removed temporary SSH private key file."
+          fi
