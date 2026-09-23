@@ -1,18 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { SITE_URL } from "../../lib/site";
 
 export const metadata: Metadata = {
   title: "ScaleInk Privacy Policy",
   description:
     "Privacy Policy for ScaleInk, an iPad PDF drawing and measurement app.",
+  alternates: { canonical: new URL("/privacy", SITE_URL).toString() },
 };
 
 const SUPPORT_EMAIL = "scaleink.support@gmail.com";
-const EFFECTIVE_DATE = "2026-09-10";
+const EFFECTIVE_DATE = "2026-09-23";
 
 export default function PrivacyPage() {
   return (
-    <div className="content">
+    <div className="content" lang="en">
       <h1>ScaleInk Privacy Policy</h1>
       <p className="lede">
         ScaleInk is an iPad app for marking up, measuring, and organizing PDF
@@ -34,7 +36,7 @@ export default function PrivacyPage() {
         <li>No user accounts or sign-in of any kind</li>
         <li>No cloud sync of your files or data</li>
         <li>No collaboration or sharing features that transmit your data to other users</li>
-        <li>No custom analytics or tracking SDKs</li>
+        <li>No custom analytics or tracking SDKs in the ScaleInk app</li>
         <li>No advertising SDKs</li>
         <li>No upload of your PDFs or drawings to any server we operate</li>
       </ul>
@@ -63,10 +65,21 @@ export default function PrivacyPage() {
       <h2>Third-Party Services</h2>
       <p>
         Other than Apple&rsquo;s App Store and StoreKit (used to process
-        purchases as described above), ScaleInk does not integrate
+        purchases as described above), the ScaleInk app does not integrate
         third-party analytics, advertising, or data-sharing services. We do
         not sell or share your personal information with third parties for
         advertising purposes.
+      </p>
+
+      <h2>Website Analytics</h2>
+      <p>
+        This website uses Vercel Web Analytics to understand aggregate website
+        usage, such as page views, referrers, general location, browser, device,
+        and operating system information. Vercel Web Analytics does not use
+        cookies and stores anonymized, aggregated data that is not intended to
+        identify individual visitors. This website analytics is separate from
+        the ScaleInk app and does not access PDFs, drawings, measurements, or
+        other content stored in the app.
       </p>
 
       <h2>Contact Information</h2>

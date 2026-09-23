@@ -1,17 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { SITE_URL } from "../../lib/site";
 
 export const metadata: Metadata = {
   title: "ScaleInk Support",
   description:
     "ScaleInk support, troubleshooting, feedback and contact information.",
+  alternates: { canonical: new URL("/support", SITE_URL).toString() },
 };
 
 const SUPPORT_EMAIL = "scaleink.support@gmail.com";
 
 export default function SupportPage() {
   return (
-    <div className="content">
+    <div className="content" lang="en">
       <h1>ScaleInk Support</h1>
       <p className="lede">
         ScaleInk is an iPad app for marking up, measuring, and organizing PDF
