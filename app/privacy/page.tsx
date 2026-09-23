@@ -71,17 +71,6 @@ export default function PrivacyPage() {
         advertising purposes.
       </p>
 
-      <h2>Website Analytics</h2>
-      <p>
-        This website uses Vercel Web Analytics to understand aggregate website
-        usage, such as page views, referrers, general location, browser, device,
-        and operating system information. Vercel Web Analytics does not use
-        cookies and stores anonymized, aggregated data that is not intended to
-        identify individual visitors. This website analytics is separate from
-        the ScaleInk app and does not access PDFs, drawings, measurements, or
-        other content stored in the app.
-      </p>
-
       <h2>Contact Information</h2>
       <p>
         If you email us at{" "}
