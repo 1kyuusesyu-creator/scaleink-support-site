@@ -1,11 +1,48 @@
-import type { Metadata } from "next";
-import Link from "next/link";
+import { Analytics } from "@vercel/analytics/next";
+import { Noto_Sans_JP } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import SiteFooter from "../components/site-footer";
+import SiteHeader from "../components/site-header";
+import { SITE_URL } from "../lib/site";
 import "./globals.css";
 
+const notoSansJP = Noto_Sans_JP({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-noto-sans-jp",
+  fallback: ["Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", "sans-serif"],
+});
+
 export const metadata: Metadata = {
-  title: "ScaleInk",
+  metadataBase: new URL(SITE_URL),
+  title: "ScaleInk｜建築・設計のためのiPad図面レビューアプリ",
   description:
-    "ScaleInk is an iPad app for marking up, measuring, and organizing PDF drawings.",
+    "ScaleInkは、PDF図面への赤入れ、Apple Pencilでの手書き、縮尺登録・寸法計測、レイヤー管理を一つにまとめたiPad専用の図面レビューアプリです。",
+  alternates: { canonical: SITE_URL },
+  icons: { icon: "/scaleink-app-icon.jpeg", apple: "/scaleink-app-icon.jpeg" },
+  openGraph: {
+    title: "ScaleInk｜建築・設計のためのiPad図面レビューアプリ",
+    description: "PDF図面への赤入れ、縮尺計測、レイヤー整理を一つに。",
+    url: SITE_URL,
+    siteName: "ScaleInk",
+    locale: "ja_JP",
+    type: "website",
+    images: [
+      {
+        url: "/scaleink-redline.jpeg",
+        width: 2752,
+        height: 2064,
+        alt: "ScaleInkでPDF図面に赤入れしているiPad画面",
+      },
+    ],
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  colorScheme: "light",
+  themeColor: "#F1ECDF",
 };
 
 export default function RootLayout({
@@ -14,29 +51,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="ja" className={notoSansJP.variable}>
       <body>
-        <div className="site">
-          <header className="site-header">
-            <div className="header-inner">
-              <Link href="/" className="brand">
-                ScaleInk
-              </Link>
-            </div>
-          </header>
-
-          <main>{children}</main>
-
-          <footer className="site-footer">
-            <div className="footer-inner">
-              <span>&copy; {new Date().getFullYear()} ScaleInk</span>
-              <nav className="footer-links">
-                <Link href="/support">Support</Link>
-                <Link href="/privacy">Privacy</Link>
-              </nav>
-            </div>
-          </footer>
+        <div className="site-shell">
+          <SiteHeader />
+          <main id="top">{children}</main>
+          <SiteFooter />
         </div>
+        {process.env.NODE_ENV === "production" && <Analytics />}
       </body>
     </html>
   );
