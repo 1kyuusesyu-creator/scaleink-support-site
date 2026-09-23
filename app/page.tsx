@@ -134,7 +134,7 @@ export default function HomePage() {
         <Screenshot
           src={images.redline}
           alt="ScaleInkで受付カウンター詳細図に赤い円と矢印、R50の手書きメモを加えているiPad画面"
-          caption="受付カウンター詳細図に、R50の検討メモを手書きした画面。"
+          caption="図面上に検討メモを手書きした画面。"
         />
       </section>
 
