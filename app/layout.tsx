@@ -14,9 +14,9 @@ const notoSansJP = Noto_Sans_JP({
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: "ScaleInk｜建築・設計のためのiPad図面レビューアプリ",
+  title: "ScaleInk（スケールインク）｜建築・設計のためのiPad図面レビューアプリ",
   description:
-    "ScaleInkは、PDF図面への赤入れ、Apple Pencilでの手書き、縮尺登録・寸法計測、レイヤー管理を一つにまとめたiPad専用の図面レビューアプリです。",
+    "ScaleInk（スケールインク）は、PDF図面への赤入れ、Apple Pencilでの手書き、縮尺登録・寸法計測、レイヤー管理を一つにまとめたiPad専用の図面レビューアプリです。",
   alternates: { canonical: SITE_URL },
   icons: { icon: "/scaleink-app-icon.jpeg", apple: "/scaleink-app-icon.jpeg" },
   openGraph: {

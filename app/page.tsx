@@ -121,7 +121,7 @@ export default function HomePage() {
             <span className="hero-line">iPadひとつで。</span>
           </h1>
           <p className="lead">
-            PDF図面への赤入れ、縮尺計測、レイヤー整理を一つに。ScaleInkなら、図面を開いて、その場で書く・測る・まとめるまで進められます。
+            PDF図面への赤入れ、縮尺計測、レイヤー整理を一つに。ScaleInk（スケールインク）なら、図面を開いて、その場で書く・測る・まとめるまで進められます。
           </p>
           <div className="hero-actions">
             <AppStoreButton />
@@ -144,7 +144,7 @@ export default function HomePage() {
           <h2>気づいたその場で、<br />図面に赤入れ。</h2>
         </div>
         <div className="intro-body body-copy">
-          <p>Apple Pencilを使って、PDF図面に直接書き込み。ペンやマーカー、消しゴムに加えて、テキストや図形でも指示を残せます。</p>
+          <p>ScaleInkは、Apple Pencilを使ってPDF図面に直接書き込めます。ペンやマーカー、消しゴムに加えて、テキストや図形でも指示を残せます。</p>
           <p>紙に出力せず、図面を見ながらそのまま検討を進められます。</p>
         </div>
         <div className="intro-rule" aria-hidden="true"><span>01</span><i /></div>
@@ -263,6 +263,7 @@ export default function HomePage() {
             "@context": "https://schema.org",
             "@type": "SoftwareApplication",
             name: "ScaleInk",
+            alternateName: "スケールインク",
             applicationCategory: "BusinessApplication",
             operatingSystem: "iPadOS",
             description: "PDF図面への赤入れ、Apple Pencilでの手書き、縮尺登録・寸法計測、レイヤー管理を一つにまとめたiPad専用の図面レビューアプリです。",
