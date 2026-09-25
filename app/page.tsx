@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import {
   ArrowDown,
   ArrowUpRight,
@@ -230,6 +231,15 @@ export default function HomePage() {
               </div>
               <div className="plan-prices"><span>月額 <b>¥600</b></span><span className="selected">年額 <b>¥3,600</b></span><span>買い切り <b>¥9,800</b></span></div>
               <ul><li>Freeのすべての機能</li><li>プロジェクト数の制限なし</li><li>レイヤー数の制限なし</li><li>Stackの作成・移動・複製</li></ul>
+              <div className="plan-boundary">
+                <p className="plan-boundary-note">
+                  <strong>月額・年額：</strong>ScaleInk Pro機能を利用できます。今後、継続的なオンラインサービスが追加される場合があります。
+                </p>
+                <p className="plan-boundary-note">
+                  <strong>買い切り：</strong>一度の購入で、端末上で提供されるScaleInk Pro機能を期限なく利用できます。
+                </p>
+                <Link href="/purchase" className="plan-boundary-link">プランと購入条件の詳細</Link>
+              </div>
               <AppStoreButton label="App Storeでプランを見る" />
             </article>
           </div>

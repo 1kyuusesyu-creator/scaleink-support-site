@@ -77,6 +77,11 @@ button,a { -webkit-tap-highlight-color:transparent; }
 .plan-prices span { padding:11px 12px; border:1px solid rgba(241,236,223,.23); color:#bbc2bd; font-size:11px; }
 .plan-prices b { display:block; margin-top:5px; color:var(--cream); font-size:15px; }
 .plan-prices .selected { border-color:var(--emerald); background:rgba(31,174,130,.15); }
+.plan-boundary { margin:18px 0 0; }
+.plan-boundary-note { color:#aab5ae; font-size:12px; line-height:1.7; margin:8px 0 0; }
+.plan-boundary-note strong { color:var(--cream); }
+.plan-boundary-link { display:inline-block; margin-top:10px; color:var(--emerald); font-size:12px; font-weight:700; text-decoration:underline; }
+.plan-boundary-link:hover { color:var(--cream); }
 .price-footnote { max-width:760px; margin:22px 0 0; color:var(--muted); font-size:11px; line-height:1.8; }
 .faq-section { padding:125px 0 140px; display:grid; grid-template-columns:.8fr 1.2fr; gap:90px; }
 .faq-list { border-top:1px solid var(--line); }
