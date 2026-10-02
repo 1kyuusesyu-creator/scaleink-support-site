@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowDown,
+  ArrowRight,
   ArrowUpRight,
   ChevronDown,
   FileText,
@@ -10,7 +11,11 @@ import {
   Ruler,
   Shapes,
 } from "lucide-react";
-import { APP_STORE_URL, SITE_URL } from "../lib/site";
+import {
+  APP_STORE_URL,
+  DRAWING_SCALE_ARTICLE_PATH,
+  SITE_URL,
+} from "../lib/site";
 
 const images = {
   projects: "/scaleink-projects.png",
@@ -162,7 +167,12 @@ export default function HomePage() {
         >
           <p>図面内の既知寸法を使ってスケールを登録。測りたい区間をなぞるだけで、図面上に実寸を表示します。</p>
           <p>紙のスケールを当て直さず、PDFのまま距離や寸法を確認できます。</p>
-          {/* 将来ここに縮尺・計測SEO記事へのリンクを追加 */}
+          <p>
+            <Link href={DRAWING_SCALE_ARTICLE_PATH} className="text-link">
+              図面の縮尺を計算できるアプリとは？PDFを実寸で測る方法
+              <ArrowRight size={15} aria-hidden="true" />
+            </Link>
+          </p>
         </FeatureSection>
         <FeatureSection
           id="layers"
