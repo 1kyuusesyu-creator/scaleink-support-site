@@ -157,6 +157,22 @@ export default function DrawingScaleAppArticle() {
         </header>
         <p>通路幅や家具と壁の間隔など、図面には寸法が直接書かれていない箇所があります。PDFの縮尺が分からない場合、定規や三角スケールでは実寸は読み取れません。</p>
         <p>このような場合は、あらかじめ寸法が明記されている区間を基準にして測定するしかありません。手作業でも対応できますが、アプリを使えば基準を登録し、画面上の定規で効率よく確認できます。</p>
+        <a
+          className="article-app-card"
+          href={APP_STORE_URL}
+          target="_blank"
+          rel="noreferrer"
+        >
+          <span className="article-app-card-copy">
+            <span className="article-app-card-eyebrow">ScaleInk</span>
+            <span className="article-app-card-title">
+              <span className="article-app-card-phrase">図面を測って、</span>
+              <span className="article-app-card-phrase">そのまま赤入れ。</span>
+            </span>
+            <span className="article-app-card-link">App Storeで見る →</span>
+          </span>
+          <Image className="app-icon article-app-card-icon" src="/scaleink-app-icon.jpeg" alt="" width={104} height={104} />
+        </a>
 
         <h2>PDF図面で寸法のない場所を測りにくい理由</h2>
 
