@@ -169,7 +169,7 @@ export default function HomePage() {
           <p>紙のスケールを当て直さず、PDFのまま距離や寸法を確認できます。</p>
           <p>
             <Link href={DRAWING_SCALE_ARTICLE_PATH} className="text-link">
-              図面の縮尺を計算できるアプリとは？PDFを実寸で測る方法
+              図面の縮尺を計算する方法｜PDFを実寸で測れるアプリの使い方
               <ArrowRight size={15} aria-hidden="true" />
             </Link>
           </p>
