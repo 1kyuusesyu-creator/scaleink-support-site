@@ -233,6 +233,11 @@ button,a { -webkit-tap-highlight-color:transparent; }
 html[lang="en"] body { font-family:var(--font-en), 'Helvetica Neue', Arial, sans-serif; }
 html[lang="en"] h1,
 html[lang="en"] h2 { text-wrap:balance; }
+/* /en/ only: the shared .shot aspect ratios (1.52 / 1.46 / 1.25 / 1.22) crop the 4:3 screenshots (status bar, toolbar,
+   edge labels, bottom notes). .shot-full shows them whole. Specificity beats .hero .shot / .feature-section .shot,
+   including their max-width:800px overrides, so the shared rules stay untouched for the Japanese pages. */
+html[lang="en"] .shot-wrap.shot-full .shot { aspect-ratio:4 / 3; }
+html[lang="en"] .shot-wrap.shot-full .shot img { object-fit:contain; } /* the 1px border makes the content box a hair off 4:3; contain never crops */
 html[lang="en"] .hero { grid-template-columns:.95fr 1.05fr; gap:56px; }
 html[lang="en"] .hero h1 { font-size:clamp(36px,4.3vw,58px); line-height:1.08; letter-spacing:-.035em; }
 html[lang="en"] .hero h1 .hero-line { white-space:normal; }

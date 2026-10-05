@@ -34,6 +34,8 @@ function AppStoreButton({
   );
 }
 
+// className: "shot-full" = 4:3 のスクリーンショットを切り抜かずに全体表示（/en/ 専用。globals.css の html[lang="en"] 側で定義）。
+// "crop-projects" = Project Home を上部だけ見せる（日本語版と同じ共通ルール）。
 function Screenshot({
   image,
   caption,
@@ -97,7 +99,7 @@ function FeatureSection({
         <h2>{title}</h2>
         <div className="body-copy">{children}</div>
       </div>
-      <Screenshot image={image} caption={caption} className={crop ? "crop-projects" : ""} />
+      <Screenshot image={image} caption={caption} className={crop ? "crop-projects" : "shot-full"} />
     </section>
   );
 }
@@ -123,7 +125,7 @@ export default function HomePageEn() {
           </div>
           <p className="microcopy">iPad only · Apple Pencil supported · No ScaleInk account required</p>
         </div>
-        <Screenshot image={EN_IMAGES.redline} caption="Handwritten review notes on a drawing." />
+        <Screenshot image={EN_IMAGES.redline} caption="Handwritten review notes on a drawing." className="shot-full" />
       </section>
 
       <section id="features" className="intro-feature container">
