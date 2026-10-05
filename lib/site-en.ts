@@ -14,29 +14,30 @@ export const TOP_PAGE_LANGUAGES = {
 } as const;
 
 // 英語版トップで使うスクリーンショット（パス・alt・実ファイルの画素寸法を1か所に集約）。
-// 英語化済みの *-en 版ができたら、src（と width / height）だけ差し替えればよい。
-// 現状は英語化済み画像がないため、すべて日本語表記の元画像を暫定で使っている。
+// 日本語の元画像（/scaleink-*.png|jpeg）から、図面内の日本語と一部のアプリUI文言を画像上で英語に置き換えた *-en 版。
+// UI 文言（Layers / Projects / Select / 相対時刻 / 日付）は暫定表記で、アプリ側の英語表記と照合して差し替える。
+// 差し替えるときは src（と、寸法が変わる場合は width / height）だけを書き換えればよい。
 export const EN_IMAGES = {
   redline: {
-    src: "/scaleink-redline.jpeg", // TODO: /scaleink-redline-en.jpeg
+    src: "/scaleink-redline-en.jpeg",
     width: 1536,
     height: 1152,
     alt: "iPad screen showing ScaleInk with a red circle, an arrow, and a handwritten note marked up on a reception counter drawing",
   },
   measurement: {
-    src: "/scaleink-measurement.png", // TODO: /scaleink-measurement-en.png
+    src: "/scaleink-measurement-en.png",
     width: 1536,
     height: 1152,
     alt: "iPad screen showing ScaleInk with the scale set from a known 2,400 mm dimension and a passage width measured at 1,800 mm (1.8 m)",
   },
   layers: {
-    src: "/scaleink-layers.png", // TODO: /scaleink-layers-en.png
+    src: "/scaleink-layers-en.png",
     width: 1536,
     height: 1152,
     alt: "ScaleInk layers panel listing two layers, with red review marks and a blue wiring note overlaid on the drawing",
   },
   projects: {
-    src: "/scaleink-projects.png", // TODO: /scaleink-projects-en.png
+    src: "/scaleink-projects-en.png",
     width: 2752,
     height: 2064,
     alt: "ScaleInk Project Home showing three drawing projects as thumbnails",
