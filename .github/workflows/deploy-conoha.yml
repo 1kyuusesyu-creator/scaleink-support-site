@@ -501,6 +501,8 @@ jobs:
             "/privacy/"
             "/robots.txt"
             "/sitemap.xml"
+            "/en/"
+            "/scaleink-redline-en.jpeg"
           )
           failed=0
           for route in "${routes[@]}"; do
