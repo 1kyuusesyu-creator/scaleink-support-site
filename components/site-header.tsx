@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowUpRight, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { APP_STORE_URL } from "../lib/site";
+import LangSwitch from "./lang-switch";
 
 export default function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -21,6 +22,7 @@ export default function SiteHeader() {
           <Link href="/#features" onClick={closeMenu}>できること</Link>
           <Link href="/#pricing" onClick={closeMenu}>料金</Link>
           <Link href="/#faq" onClick={closeMenu}>よくある質問</Link>
+          <LangSwitch current="ja" label="言語" />
         </nav>
         <div className="header-cta">
           <a href={APP_STORE_URL} className="button button-dark" target="_blank" rel="noreferrer">

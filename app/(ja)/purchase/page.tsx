@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { SITE_URL } from "../../lib/site";
+import { SITE_URL } from "../../../lib/site";
 
 export const metadata: Metadata = {
   title: "ScaleInk プランと購入条件",

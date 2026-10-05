@@ -1,9 +1,9 @@
 import { Noto_Sans_JP } from "next/font/google";
 import type { Metadata, Viewport } from "next";
-import SiteFooter from "../components/site-footer";
-import SiteHeader from "../components/site-header";
-import { SITE_URL } from "../lib/site";
-import "./globals.css";
+import SiteFooter from "../../components/site-footer";
+import SiteHeader from "../../components/site-header";
+import { SITE_URL } from "../../lib/site";
+import "../globals.css";
 
 const notoSansJP = Noto_Sans_JP({
   subsets: ["latin"],

@@ -7,7 +7,7 @@ import {
   DRAWING_SCALE_ARTICLE_DATES,
   DRAWING_SCALE_ARTICLE_URL,
   SITE_URL,
-} from "../../../lib/site";
+} from "../../../../lib/site";
 
 const TITLE = "図面の縮尺を計算する方法｜PDFを実寸で測れるアプリの使い方";
 const DESCRIPTION =

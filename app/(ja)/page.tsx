@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -15,7 +16,13 @@ import {
   APP_STORE_URL,
   DRAWING_SCALE_ARTICLE_PATH,
   SITE_URL,
-} from "../lib/site";
+} from "../../lib/site";
+import { TOP_PAGE_LANGUAGES } from "../../lib/site-en";
+
+// layout の alternates（canonical）は page の alternates で置き換わるため、canonical も再掲する。
+export const metadata: Metadata = {
+  alternates: { canonical: SITE_URL, languages: TOP_PAGE_LANGUAGES },
+};
 
 const images = {
   projects: "/scaleink-projects.png",

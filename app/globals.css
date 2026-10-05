@@ -216,3 +216,47 @@ button,a { -webkit-tap-highlight-color:transparent; }
   .article-app-card { transition:none; }
   .article-app-card:hover { transform:none; }
 }
+
+/* Language switch (header: 日本語 / English) */
+.lang-switch { display:flex; align-items:center; gap:7px; padding-left:28px; border-left:1px solid var(--line); font-size:12px; color:var(--muted); white-space:nowrap; }
+.lang-switch [aria-current] { color:var(--dark); font-weight:700; }
+.lang-switch a { color:var(--muted); text-decoration:underline; text-underline-offset:3px; }
+.lang-switch a:hover { color:var(--emerald-dark); }
+.lang-switch-sep { color:rgba(20,24,31,.35); }
+@media (max-width:800px) {
+  .nav .lang-switch { padding:14px 0 0; border-left:0; font-size:13px; }
+  .nav .lang-switch a { padding:6px 0; border-bottom:0; }
+  .nav .lang-switch [aria-current] { padding:6px 0; }
+}
+
+/* English page (html[lang="en"]): Latin type needs looser tracking and leading than the Japanese layout */
+html[lang="en"] body { font-family:var(--font-en), 'Helvetica Neue', Arial, sans-serif; }
+html[lang="en"] h1,
+html[lang="en"] h2 { text-wrap:balance; }
+html[lang="en"] .hero { grid-template-columns:.95fr 1.05fr; gap:56px; }
+html[lang="en"] .hero h1 { font-size:clamp(36px,4.3vw,58px); line-height:1.08; letter-spacing:-.035em; }
+html[lang="en"] .hero h1 .hero-line { white-space:normal; }
+html[lang="en"] .hero .eyebrow { letter-spacing:.06em; line-height:1.5; }
+html[lang="en"] .lead { line-height:1.7; }
+html[lang="en"] .intro-copy h2,
+html[lang="en"] .feature-copy h2,
+html[lang="en"] .section-heading h2 { font-size:clamp(28px,3.5vw,46px); line-height:1.15; letter-spacing:-.03em; }
+html[lang="en"] .final-cta h2 { font-size:clamp(32px,4.4vw,56px); line-height:1.12; letter-spacing:-.03em; }
+html[lang="en"] .body-copy,
+html[lang="en"] .section-lead { line-height:1.75; }
+html[lang="en"] .tool-card p,
+html[lang="en"] .faq-list p { line-height:1.65; }
+html[lang="en"] .final-cta p:not(.eyebrow) { line-height:1.7; }
+html[lang="en"] .price-text { font-size:38px; letter-spacing:-.04em; }
+html[lang="en"] .plan-names span { color:var(--cream); font-size:13px; font-weight:700; }
+@media (max-width:800px) {
+  html[lang="en"] .hero { display:flex; gap:44px; }
+  html[lang="en"] .hero h1 { font-size:40px; }
+  html[lang="en"] .intro-copy h2,
+  html[lang="en"] .feature-copy h2,
+  html[lang="en"] .section-heading h2 { font-size:30px; }
+  html[lang="en"] .final-cta h2 { font-size:36px; }
+}
+@media (max-width:430px) {
+  html[lang="en"] .hero h1 { font-size:36px; }
+}

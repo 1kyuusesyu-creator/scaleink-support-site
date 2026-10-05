@@ -4,6 +4,7 @@ import {
   DRAWING_SCALE_ARTICLE_URL,
   SITE_URL,
 } from "../lib/site";
+import { EN_TOP_URL } from "../lib/site-en";
 
 export const dynamic = "force-static";
 
@@ -14,6 +15,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   return [
     { url: SITE_URL, lastModified, changeFrequency: "monthly", priority: 1 },
+    { url: EN_TOP_URL, lastModified: new Date("2026-10-05"), changeFrequency: "monthly", priority: 0.9 },
     // 記事の日付が未設定の間は lastModified を出力しない（lib/site.ts の DRAWING_SCALE_ARTICLE_DATES）。
     {
       url: DRAWING_SCALE_ARTICLE_URL,
