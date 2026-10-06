@@ -137,7 +137,6 @@ export default function HomePageEn() {
           <p>ScaleInk lets you write directly on PDF drawings with Apple Pencil. Besides the pen, marker, and eraser, you can leave instructions with text and shapes.</p>
           <p>No printing needed. Keep reviewing right on the drawing, as you look at it.</p>
         </div>
-        <div className="intro-rule" aria-hidden="true"><span>01</span><i /></div>
       </section>
 
       <div className="container feature-list">
